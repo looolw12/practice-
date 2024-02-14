@@ -8,66 +8,35 @@ class TextFields extends StatelessWidget {
   final bool isRunning;
   final void Function(bool?)? onRandomizeDelayChanged;
 
-  TextFields({
+  const TextFields({
+    Key? key,
     required this.delayController,
     required this.parController,
     required this.repeatsController,
     required this.randomizeDelay,
     required this.isRunning,
     required this.onRandomizeDelayChanged,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Delay time:'),
-            const SizedBox(width: 10),
-            Flexible(
-              child: TextField(
-                controller: delayController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Enter delay time in seconds',
-                ),
-              ),
-            ),
-          ],
+        _buildTextField(
+          label: 'Delay time:',
+          hintText: 'Enter delay time in seconds',
+          controller: delayController,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Par time:'),
-            const SizedBox(width: 10),
-            Flexible(
-              child: TextField(
-                controller: parController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Enter par time in seconds',
-                ),
-              ),
-            ),
-          ],
+        _buildTextField(
+          label: 'Par time:',
+          hintText: 'Enter par time in seconds',
+          controller: parController,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Repeats:'),
-            const SizedBox(width: 10),
-            Flexible(
-              child: TextField(
-                controller: repeatsController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Enter number of repeats',
-                ),
-              ),
-            ),
-          ],
+        _buildTextField(
+          label: 'Repeats:',
+          hintText: 'Enter number of repeats',
+          controller: repeatsController,
         ),
         const SizedBox(height: 20),
         Row(
@@ -83,5 +52,34 @@ class TextFields extends StatelessWidget {
       ],
     );
   }
-}
 
+  Widget _buildTextField({
+    required String label,
+    required String hintText,
+    required TextEditingController controller,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16, // Adjust font size as necessary
+            ),
+          ),
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: hintText,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

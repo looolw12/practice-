@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'audio_controls.dart';
-import 'text_fields.dart';
+import 'audio_controls.dart'; // Import the AudioControls widget
+import 'text_fields.dart'; // Import the TextFields widget
 
 class AudioTimer extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _AudioTimerState extends State<AudioTimer> {
   TextEditingController delayController = TextEditingController();
   TextEditingController parController = TextEditingController();
   TextEditingController repeatsController = TextEditingController();
-  bool randomizeDelay = false;
+  bool randomizeDelay = false; // Flag to randomize delay time
   Timer? _timer;
   int _currentRepeat = 0;
   bool _isRunning = false;
@@ -40,16 +40,16 @@ class _AudioTimerState extends State<AudioTimer> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFields(
+              TextFields( // Render the text input fields
                 delayController: delayController,
                 parController: parController,
                 repeatsController: repeatsController,
                 randomizeDelay: randomizeDelay,
                 isRunning: _isRunning,
-                onRandomizeDelayChanged: _onRandomizeDelayChanged,
+                onRandomizeDelayChanged: _onRandomizeDelayChanged, // Callback function for randomize delay checkbox
               ),
               const SizedBox(height: 20),
-              AudioControls(
+              AudioControls( // Render the start/stop button
                 isRunning: _isRunning,
                 stopTimer: _stopTimer,
                 startTimer: _startTimer,
@@ -76,13 +76,13 @@ class _AudioTimerState extends State<AudioTimer> {
     }
 
     _timer = Timer.periodic(Duration(seconds: delayTime), (timer) {
-      if (randomizeDelay) {
-        final randomOffset = delayTime ~/ 4; // 25% от delayTime
-        final randomDelay = randomOffset !=0
-          ? delayTime - randomOffset + (2 * randomOffset * DateTime.now().microsecondsSinceEpoch % randomOffset) ~/ 1000000
-          : delayTime;
+      if (randomizeDelay) { // Check if randomize delay flag is enabled
+        final randomOffset = delayTime ~/ 4;
+        final randomDelay = randomOffset != 0
+            ? delayTime - randomOffset + (2 * randomOffset * DateTime.now().microsecondsSinceEpoch % randomOffset) ~/ 1000000
+            : delayTime;
         timer.cancel();
-        _timer = Timer.periodic(Duration(seconds: randomDelay), _timerCallback);
+        _timer = Timer.periodic(Duration(seconds: randomDelay), _timerCallback); // Set a timer with randomized delay
       } else {
         _timerCallback(timer);
       }
@@ -122,9 +122,9 @@ class _AudioTimerState extends State<AudioTimer> {
     }
   }
 
-  void _onRandomizeDelayChanged(bool? value) {
+  void _onRandomizeDelayChanged(bool? value) { // Callback function for randomize delay checkbox
     setState(() {
-      randomizeDelay = value ?? false;
+      randomizeDelay = value ?? false; // Update randomizeDelay flag
     });
   }
 }
