@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'audio_controls.dart'; // Import the AudioControls widget
 import 'text_fields.dart'; // Import the TextFields widget
@@ -61,8 +64,13 @@ class _AudioTimerState extends State<AudioTimer> {
     );
   }
 
-  void _playSound() async {
-    await player.setAsset('assets/a.mp3');
+  Future<void> _playSound() async {
+    var content = await rootBundle.load("assets/sound.mp3");
+    final directory = await getApplicationDocumentsDirectory();
+    var file = File("${directory.path}/sound.mp3");
+    file.writeAsBytesSync(content.buffer.asUint8List());
+
+    await player.setFilePath(file.path);
     await player.play();
   }
 
@@ -75,18 +83,21 @@ class _AudioTimerState extends State<AudioTimer> {
       return;
     }
 
-    _timer = Timer.periodic(Duration(seconds: delayTime), (timer) {
-      if (randomizeDelay) { // Check if randomize delay flag is enabled
-        final randomOffset = delayTime ~/ 4;
-        final randomDelay = randomOffset != 0
-            ? delayTime - randomOffset + (2 * randomOffset * DateTime.now().microsecondsSinceEpoch % randomOffset) ~/ 1000000
-            : delayTime;
+    _timer = Timer.periodic(Duration(seconds: delayTime + parTime), (timer) {
+      _playSound();
+      Future.delayed(Duration(seconds: parTime), () {
+        _playSound();
+      });
+      _currentRepeat++;
+      if (_currentRepeat >= repeats) {
         timer.cancel();
-        _timer = Timer.periodic(Duration(seconds: randomDelay), _timerCallback); // Set a timer with randomized delay
-      } else {
-        _timerCallback(timer);
+        _currentRepeat = 0;
+        setState(() {
+          _isRunning = false;
+        });
       }
     });
+
     setState(() {
       _isRunning = true;
     });
@@ -104,20 +115,21 @@ class _AudioTimerState extends State<AudioTimer> {
     final repeats = int.tryParse(repeatsController.text) ?? 0;
 
     if (_currentRepeat < repeats) {
-      _playSound();
-      _currentRepeat++;
-      if (_currentRepeat <= repeats) {
-        Future.delayed(Duration(seconds: parTime), () {
-          _playSound();
-        });
-      }
-    } else {
-      Future.delayed(const Duration(seconds: 0), () {
-        timer.cancel();
-        _currentRepeat = 0;
-        setState(() {
-          _isRunning = false;
-        });
+      _playSound().then((_) {
+        _currentRepeat++;
+        if (_currentRepeat < repeats) { // Проверяем, есть ли еще повторы
+          Future.delayed(Duration(seconds: parTime), () {
+            _timerCallback(timer);
+          });
+        } else {
+          Future.delayed(Duration(seconds: parTime), () {
+            timer.cancel(); // Останавливаем таймер после последнего повтора
+            _currentRepeat = 0;
+            setState(() {
+              _isRunning = false;
+            });
+          });
+        }
       });
     }
   }
