@@ -75,17 +75,17 @@ class _AudioTimerState extends State<AudioTimer> {
   }
 
   void _startTimer() {
-    final delayTime = int.tryParse(delayController.text) ?? 0;
-    final parTime = int.tryParse(parController.text) ?? 0;
-    final repeats = int.tryParse(repeatsController.text) ?? 0;
+    final delayTime = double.tryParse(delayController.text) ?? 0;
+    final parTime = double.tryParse(parController.text) ?? 0;
+    final repeats = double.tryParse(repeatsController.text) ?? 0;
 
     if (delayTime <= 0 || parTime <= 0 || repeats <= 0) {
       return;
     }
 
-    _timer = Timer.periodic(Duration(seconds: delayTime + parTime), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: ((delayTime + parTime) * 1000).toInt()), (timer) {
       _playSound();
-      Future.delayed(Duration(seconds: parTime), () {
+      Future.delayed(Duration(milliseconds: ((parTime)* 1000).toInt()), () {
         _playSound();
       });
       _currentRepeat++;
@@ -108,30 +108,6 @@ class _AudioTimerState extends State<AudioTimer> {
     setState(() {
       _isRunning = false;
     });
-  }
-
-  void _timerCallback(Timer timer) {
-    final parTime = int.tryParse(parController.text) ?? 0;
-    final repeats = int.tryParse(repeatsController.text) ?? 0;
-
-    if (_currentRepeat < repeats) {
-      _playSound().then((_) {
-        _currentRepeat++;
-        if (_currentRepeat < repeats) { // Проверяем, есть ли еще повторы
-          Future.delayed(Duration(seconds: parTime), () {
-            _timerCallback(timer);
-          });
-        } else {
-          Future.delayed(Duration(seconds: parTime), () {
-            timer.cancel(); // Останавливаем таймер после последнего повтора
-            _currentRepeat = 0;
-            setState(() {
-              _isRunning = false;
-            });
-          });
-        }
-      });
-    }
   }
 
   void _onRandomizeDelayChanged(bool? value) { // Callback function for randomize delay checkbox
